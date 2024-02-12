@@ -196,9 +196,10 @@ def create_game(cols: list, season: str, db_teams: dict[str: Team]) -> Game:
 
 def run():
     
+    username = input("Enter DB username: ")
     password = input("Enter DB password: ")
-    mongoengine.connect(db="nfl_model", username="seanbuchanan55", password=password,
-                        host="mongodb+srv://seanbuchanan55:{}@cluster0.yi9feah.mongodb.net/nfl_model?retryWrites=true&w=majority".format(password))
+    mongoengine.connect(db="nfl_model", username=username, password=password,
+                        host=f"mongodb+srv://{username}:{password}@cluster0.yi9feah.mongodb.net/nfl_model?retryWrites=true&w=majority")
     print("Successfully connected to database.")
 
     elo_mean = 1505
