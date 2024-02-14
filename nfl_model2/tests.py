@@ -1,9 +1,11 @@
 from unittest import TestCase
 
-from .models import Team, Game, connect_to_database
-from .elo.elo_model import get_distance, pregame_elo_shift
+from .models import Team, Game
+from .elo.elo_model import (get_distance, pregame_elo_shift, 
+                            win_prob, post_game_elo_shift,
+                            pre_season_elo)
 
-# connect_to_database(db_name="testdb")
+
 
 class EloModelTests(TestCase):
     
@@ -100,3 +102,22 @@ class EloModelTests(TestCase):
     def test_pregame_elo_shift_playoff_game(self):
         self.assertGreaterEqual(pregame_elo_shift(self.playoff_game), 0)
         self.assertEquals(pregame_elo_shift(self.playoff_game), round(27 * 1.2))
+
+    def test_win_prob(self):
+        self.assertGreaterEqual(win_prob(0), 0)
+        self.assertLessEqual(win_prob(100000000000), 1)
+        self.assertEquals(win_prob(7), 0.5100724469274385)
+
+    def test_post_game_elo_shift_neutral_game(self):
+        self.assertEquals(post_game_elo_shift(self.neutral_game), 19)
+
+    def test_post_game_elo_shift_regular_game(self):
+        self.assertGreaterEqual(post_game_elo_shift(self.regular_game), 0)
+        self.assertEquals(post_game_elo_shift(self.regular_game), 19)
+
+    def test_post_game_elo_shift_playoff_game(self):
+        self.assertGreaterEqual(post_game_elo_shift(self.playoff_game), 0)
+        self.assertEquals(post_game_elo_shift(self.playoff_game), 19)
+
+    def test_pre_season_elo(self):
+        self.assertEquals(pre_season_elo(1753), 1670)

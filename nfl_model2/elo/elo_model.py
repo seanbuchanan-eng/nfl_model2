@@ -81,3 +81,77 @@ def pregame_elo_shift(game: Game) -> int:
             elo_shift = round(elo_shift * 1.2) 
     
     return elo_shift
+
+def win_prob(elo_diff: int) -> float:
+    "Calculates win probability with respect to the home team"
+    win_probability = 1/(10**(-elo_diff/400)+1)
+    return win_probability
+
+def post_game_elo_shift(game: Game) -> int:
+    """
+    Calculates the points to be added or subtracted to the home team
+    based on the game results. The opposite must be done to the away team
+    to keep elo a closed system.
+
+    Parameters
+    ----------
+    game : Game
+        Game to have the elo calculated from.
+
+    Returns
+    -------
+    int
+        The number of Elo points that need to be shifted from the away team 
+        to the home team based on the game result. Positive indicates points 
+        go to the home team, negative indicates points go to the away team.
+    """
+    home_points = game.home_points
+    away_points = game.away_points
+
+    # recommended K-factor
+    K = 20
+
+    elo_diff = game.home_pregame_elo - game.away_pregame_elo
+
+    # forcast delta
+    win_probability = win_prob(elo_diff)
+    if home_points == away_points:
+        forecast_delta = 0.5 - win_probability
+    elif home_points > away_points:
+        forecast_delta = 1 - win_probability
+    else:
+        forecast_delta = 0 - win_probability
+
+    # mov multiplier
+    point_diff = home_points - away_points
+    
+    if point_diff == 0:
+        # The explanation for accounting for a tie doesn't seem to be on the website
+        # anymore but I've decided to keep this value because it makes sense 
+        # that a team that is predicted to win ties should lose points.
+        mov = 1.525
+    else:
+        if point_diff < 0:
+            elo_diff *= -1
+        mov = np.log(abs(point_diff)+1)*(2.2/(elo_diff*0.001+2.2))
+
+    return round(K*forecast_delta*mov)
+
+def pre_season_elo(elo):
+    """
+    Calculate team's pre-season elo rating. It is essentially
+    just a regression to the mean.
+    
+    Parameters:
+    -----------
+    elo : int
+        Elo of a team at the end of a season.
+
+    Returns:
+    --------
+    int
+        New elo value for the team.
+    """
+    mean = 1505
+    new_elo = elo - (elo - mean)/3
+    return round(new_elo)
