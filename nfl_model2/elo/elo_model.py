@@ -4,7 +4,7 @@ Elo Model developed by Jay Boice at FiveThirtyEight.
 see https://fivethirtyeight.com/methodology/how-our-nfl-predictions-work/
 """
 
-from ..models import Team
+from ..models import Team, Game
 
 import numpy as np
 
@@ -37,3 +37,47 @@ def get_distance(teamA: Team, teamB: Team) -> float:
     (1 - np.sin((lat_a-lat_b)/2)**2 - np.sin((lat_a+lat_b)/2)**2)*np.sin((long_b-long_a)/2)**2))
 
     return distance/1.609 # Miles
+
+def pregame_elo_shift(game: Game) -> int:
+    """
+    Calculate the pregame elo shift for a given game.
+
+    Parameters
+    ----------
+    game : Game
+        game that the elo is to be calculated for
+
+    Returns
+    -------
+    int
+        Amount of elo that needs to be shifted from the away team to the 
+        home team. For example, add elo_shift to the home team and subtract 
+        from the away team.
+    """
+    home_team = game.home_team
+    away_team = game.away_team
+
+    elo_shift = 0
+    # check if it is superbowl
+    if game.neutral_destination != None:
+        neutral_dest = game.neutral_destination
+        home_travel_dist = get_distance(home_team, neutral_dest)
+        away_travel_dist = get_distance(away_team, neutral_dest)
+        home_team_shift = round(home_travel_dist*0.004)
+        away_team_shift = round(away_travel_dist*0.004)
+        elo_shift = (away_team_shift - home_team_shift)
+    else:
+        # regular season game
+        distance = get_distance(home_team, away_team)
+        elo_shift += 48/2
+        elo_shift += round(distance*0.004/2)
+
+        # check for playoffs and multiply by 1.2 if it is
+        try:
+            int(game.week)
+        except ValueError:
+            # Error because week is now something like 'WildCard'
+            # therefore it is playoffs
+            elo_shift = round(elo_shift * 1.2) 
+    
+    return elo_shift

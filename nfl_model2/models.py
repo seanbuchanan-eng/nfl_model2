@@ -1,13 +1,19 @@
-from mongoengine import Document
+from mongoengine import Document, connect
 from mongoengine.queryset import queryset_manager
-from mongoengine.fields import StringField, Decimal128Field, IntField, ReferenceField, BooleanField
+from mongoengine.fields import StringField, FloatField, IntField, ReferenceField, BooleanField
 
+def connect_to_database(db_name="nfl_model"):
+    username = input("Enter DB username: ")
+    password = input("Enter DB password: ")
+    connect(db="nfl_model", username=username, password=password,
+                        host=f"mongodb+srv://{username}:{password}@cluster0.yi9feah.mongodb.net/{db_name}?retryWrites=true&w=majority")
+    print("Successfully connected to database.")
 
 class Team(Document):
     name = StringField(required=True, max_length=100)
     ticker = StringField(required=True, max_length=4)
-    latitude = Decimal128Field()
-    longitude = Decimal128Field()
+    latitude = FloatField()
+    longitude = FloatField()
     elo = IntField()
 
 

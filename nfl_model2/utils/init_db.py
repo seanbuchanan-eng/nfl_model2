@@ -8,7 +8,7 @@ Seasons, Teams, Games, and Weeks, tables.
 import os
 import mongoengine
 
-from ..models import Team, Game
+from ..models import Team, Game, connect_to_database
 
 teams = {
     "Kansas City Chiefs": [39.099789, -94.578560, "KC"],
@@ -196,17 +196,16 @@ def create_game(cols: list, season: str, db_teams: dict[str: Team]) -> Game:
 
 def run():
     
-    username = input("Enter DB username: ")
-    password = input("Enter DB password: ")
-    mongoengine.connect(db="nfl_model", username=username, password=password,
-                        host=f"mongodb+srv://{username}:{password}@cluster0.yi9feah.mongodb.net/nfl_model?retryWrites=true&w=majority")
-    print("Successfully connected to database.")
+    connect_to_database()
 
     elo_mean = 1505
 
     # make team documents if they don't exist
     db_teams = {team.name: team for team in Team.objects}
     create_teams(db_teams, elo_mean)
+
+    if db_teams is None:
+        db_teams = {team.name: team for team in Team.objects}
 
     if Game.objects:
         print("game collection must be dropped before it can be initialized.")
