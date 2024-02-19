@@ -1,6 +1,6 @@
 from mongoengine import Document, connect
 from mongoengine.queryset import queryset_manager
-from mongoengine.fields import StringField, FloatField, IntField, ReferenceField, BooleanField
+from mongoengine.fields import ListField, StringField, FloatField, IntField, ReferenceField, BooleanField
 
 def connect_to_database(db_name="nfl_model"):
     username = input("Enter DB username: ")
@@ -34,3 +34,27 @@ class Game(Document):
     home_bye = BooleanField()
     away_bye = BooleanField()
     neutral_destination = ReferenceField(Team)
+
+class NNData(Document):
+    week_number = IntField()
+
+    home_pregame_elo = IntField()
+    home_pregame_elo_for = ListField()
+    home_pregame_elo_against = ListField()
+    home_points_for = ListField()
+    home_points_against = ListField()
+    home_yards_for = ListField()
+    home_yards_against = ListField()
+    home_turnovers_for = ListField()
+    home_turnovers_against = ListField()
+
+    away_pregame_elo = IntField()
+    away_pregame_elo_for = ListField()
+    away_pregame_elo_against = ListField()
+    away_points_for = ListField()
+    away_points_against = ListField()
+    away_yards_for = ListField()
+    away_yards_against = ListField()
+    away_turnovers_for = ListField()
+    away_turnovers_against = ListField()
+    
